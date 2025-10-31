@@ -170,26 +170,26 @@ export const Crash = (): JSX.Element => {
         const pathEndX = point.x;
         const pathEndY = point.y;
         
-        const isStarPhase = gameState.multiplier >= 2;
+        const isStarPhase = gameState.multiplier >= 2.5;
         
         return (
           <>
-            <div className="absolute inset-0 overflow-hidden opacity-40">
-              {!isStarPhase && Array.from({ length: 15 }).map((_, i) => {
+            <div className="absolute inset-0 overflow-hidden opacity-50">
+              {!isStarPhase && Array.from({ length: 20 }).map((_, i) => {
                 const height = 30 + Math.random() * 60;
                 const width = 15 + Math.random() * 30;
-                const left = (i * 10) % 120;
-                const delay = i * 0.3;
+                const left = (i * 8) % 120;
+                const delay = i * 0.2;
                 
                 return (
                   <div
                     key={`rect-${i}`}
-                    className="absolute bottom-0 bg-black"
+                    className="absolute top-0 bg-black"
                     style={{
                       left: `${left}%`,
                       width: `${width}px`,
                       height: `${height}%`,
-                      animation: 'rectangleMove 6s linear infinite',
+                      animation: 'rectangleMove 5s linear infinite',
                       animationDelay: `${delay}s`,
                     }}
                   />
@@ -198,11 +198,11 @@ export const Crash = (): JSX.Element => {
             </div>
             
             {isStarPhase && (
-              <div className="absolute inset-0 overflow-hidden">
-                {Array.from({ length: 50 }).map((_, i) => {
-                  const startX = Math.random() * 100;
+              <div className="absolute inset-0 overflow-hidden bg-[#0a0a15]">
+                {Array.from({ length: 80 }).map((_, i) => {
+                  const startX = Math.random() * 150;
                   const startY = Math.random() * 100;
-                  const speed = 0.5 + Math.random() * 1;
+                  const speed = 0.3 + Math.random() * 0.7;
                   const size = 1 + Math.random() * 2;
                   
                   return (
@@ -214,8 +214,8 @@ export const Crash = (): JSX.Element => {
                         top: `${startY}%`,
                         width: `${size}px`,
                         height: `${size}px`,
-                        animation: `starFall ${3 / speed}s linear infinite`,
-                        animationDelay: `${Math.random() * 2}s`,
+                        animation: `starFall ${4 / speed}s linear infinite`,
+                        animationDelay: `${Math.random() * 3}s`,
                       }}
                     />
                   );
@@ -283,20 +283,20 @@ export const Crash = (): JSX.Element => {
         const crashPathX = crashPoint.x;
         const crashPathY = crashPoint.y;
         
-        const wasCrashInStarPhase = gameState.crashPoint >= 2;
+        const wasCrashInStarPhase = gameState.crashPoint >= 2.5;
         
         return (
           <>
-            <div className="absolute inset-0 overflow-hidden opacity-40">
-              {!wasCrashInStarPhase && Array.from({ length: 15 }).map((_, i) => {
+            <div className="absolute inset-0 overflow-hidden opacity-50">
+              {!wasCrashInStarPhase && Array.from({ length: 20 }).map((_, i) => {
                 const height = 30 + Math.random() * 60;
                 const width = 15 + Math.random() * 30;
-                const left = (i * 10) % 120;
+                const left = (i * 8) % 120;
                 
                 return (
                   <div
                     key={`rect-crash-${i}`}
-                    className="absolute bottom-0 bg-black"
+                    className="absolute top-0 bg-black"
                     style={{
                       left: `${left}%`,
                       width: `${width}px`,
@@ -308,8 +308,8 @@ export const Crash = (): JSX.Element => {
             </div>
             
             {wasCrashInStarPhase && (
-              <div className="absolute inset-0 overflow-hidden">
-                {Array.from({ length: 50 }).map((_, i) => (
+              <div className="absolute inset-0 overflow-hidden bg-[#0a0a15]">
+                {Array.from({ length: 80 }).map((_, i) => (
                   <div
                     key={`star-crash-${i}`}
                     className="absolute w-1 h-1 bg-white rounded-full opacity-50"
@@ -449,21 +449,14 @@ export const Crash = (): JSX.Element => {
       </div>
 
       <main className="flex flex-col px-4 sm:px-6 md:px-8 gap-3 sm:gap-4 pb-20 md:pb-8">
-        <section className="relative w-full h-[220px] sm:h-[261px] md:h-[300px] lg:h-[350px] rounded-3xl bg-[linear-gradient(180deg,rgba(26,26,43,1)_0%,rgba(21,21,26,1)_100%)] overflow-hidden">
+        <section className="relative w-full h-[220px] sm:h-[261px] md:h-[300px] lg:h-[350px] rounded-3xl bg-[#1a1a2b] overflow-hidden">
           <img
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover opacity-80"
             alt="Mask group"
             src="/figmaAssets/mask-group.png"
           />
 
           {getGameAreaContent()}
-
-          <div className="absolute top-[29px] left-[204px] w-px h-px bg-white rounded-[0.5px]" />
-          <div className="absolute top-[19px] left-[68px] w-px h-px bg-white rounded-[0.5px]" />
-          <div className="absolute top-[66px] left-[30px] w-px h-px bg-white rounded-[0.5px]" />
-          <div className="absolute top-[6px] left-[147px] w-px h-px bg-white rounded-[0.5px]" />
-          <div className="absolute top-[80px] left-[165px] w-px h-px bg-white rounded-[0.5px]" />
-          <div className="absolute top-[12px] left-[245px] w-px h-px bg-white rounded-[0.5px]" />
         </section>
 
         <TimerSection history={gameState.history} />
