@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { WebSocketServer } from 'ws';
+import { CrashGame } from "./game/crashGame";
 
 const app = express();
 app.use(express.json());
@@ -55,6 +57,66 @@ app.use((req, res, next) => {
   } else {
     serveStatic(app);
   }
+
+  const crashGame = new CrashGame();
+
+  const wss = new WebSocketServer({ 
+    noServer: true 
+  });
+
+  server.on('upgrade', (request, socket, head) => {
+    const pathname = request.url;
+    
+    if (pathname === '/game') {
+      wss.handleUpgrade(request, socket, head, (ws) => {
+        wss.emit('connection', ws, request);
+      });
+    }
+  });
+
+  wss.on('connection', (ws) => {
+    log('Game WebSocket client connected');
+    crashGame.addClient(ws);
+
+    ws.on('message', (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        
+        if (data.type === 'placeBet') {
+          const success = crashGame.placeBet(
+            data.playerId,
+            data.amount,
+            data.autoCashout
+          );
+          if (ws.readyState === ws.OPEN) {
+            ws.send(JSON.stringify({
+              type: 'betPlaced',
+              success
+            }));
+          }
+        } else if (data.type === 'cashout') {
+          const result = crashGame.cashout(data.playerId);
+          if (ws.readyState === ws.OPEN) {
+            ws.send(JSON.stringify({
+              type: 'cashoutResult',
+              ...result
+            }));
+          }
+        }
+      } catch (error) {
+        log(`WebSocket message error: ${error}`);
+      }
+    });
+
+    ws.on('error', (error) => {
+      log(`WebSocket connection error: ${error.message}`);
+    });
+
+    ws.on('close', () => {
+      log('Game WebSocket client disconnected');
+      crashGame.removeClient(ws);
+    });
+  });
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
