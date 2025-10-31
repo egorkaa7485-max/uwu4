@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -6,7 +6,7 @@ import { BetInfoSection } from "./sections/BetInfoSection";
 import { GameControlsSection } from "./sections/GameControlsSection";
 import { TimerSection } from "./sections/TimerSection";
 
-type GameState = "waiting" | "flying" | "crashed" | "win" | "congratulations";
+type GameState = "waiting" | "flying" | "crashed" | "win";
 
 export const Crash = (): JSX.Element => {
   const [gameState, setGameState] = useState<GameState>("waiting");
@@ -14,31 +14,42 @@ export const Crash = (): JSX.Element => {
   const [multiplier, setMultiplier] = useState(3.5);
   const [countdown, setCountdown] = useState(3);
   const [winnings, setWinnings] = useState(112);
+  const congratsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (congratsTimeoutRef.current) {
+      clearTimeout(congratsTimeoutRef.current);
+      congratsTimeoutRef.current = null;
+    }
+
+    if (gameState === "win") {
+      congratsTimeoutRef.current = setTimeout(() => {
+        setShowCongrats(true);
+      }, 1000);
+    }
+
+    return () => {
+      if (congratsTimeoutRef.current) {
+        clearTimeout(congratsTimeoutRef.current);
+      }
+    };
+  }, [gameState]);
 
   const handleGameAction = () => {
     if (gameState === "waiting") {
       return;
     } else if (gameState === "flying") {
       setGameState("win");
-      setTimeout(() => {
-        setShowCongrats(true);
-      }, 1000);
     }
   };
 
   const cycleGameState = () => {
+    setShowCongrats(false);
+
     const states: GameState[] = ["waiting", "flying", "crashed", "win"];
     const currentIndex = states.indexOf(gameState);
     const nextIndex = (currentIndex + 1) % states.length;
     setGameState(states[nextIndex]);
-    
-    if (states[nextIndex] === "win") {
-      setTimeout(() => {
-        setShowCongrats(true);
-      }, 1000);
-    } else {
-      setShowCongrats(false);
-    }
   };
 
   const getGameAreaContent = () => {
