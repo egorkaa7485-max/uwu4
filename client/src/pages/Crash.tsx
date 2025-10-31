@@ -129,6 +129,13 @@ export const Crash = (): JSX.Element => {
     }
   };
 
+  const getPointOnCurve = (t: number) => {
+    const clampedT = Math.min(t, 0.8);
+    const x = clampedT * 85;
+    const y = 100 - (clampedT * 60);
+    return { x, y };
+  };
+
   const getGameAreaContent = () => {
     switch (gameState.phase) {
       case "waiting":
@@ -152,16 +159,9 @@ export const Crash = (): JSX.Element => {
       
       case "flying":
         const progress = Math.min((gameState.multiplier - 1) / 5, 1);
-        const pathProgress = progress * 100;
-        
-        const getPointOnPath = (progress: number) => {
-          const t = progress;
-          const x = t * 100;
-          const y = 100 - (t * 80 + Math.sin(t * Math.PI) * 20);
-          return { x, y };
-        };
-        
-        const point = getPointOnPath(progress);
+        const point = getPointOnCurve(progress);
+        const pathEndX = point.x;
+        const pathEndY = point.y;
         
         return (
           <>
@@ -175,16 +175,17 @@ export const Crash = (): JSX.Element => {
             </div>
             <svg className="absolute bottom-0 left-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               <defs>
-                <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <linearGradient id="lineGradient" x1="0%" y1="100%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="#c3ff00" />
                   <stop offset="100%" stopColor="#c3ff00" />
                 </linearGradient>
               </defs>
               <path
-                d={`M 0 100 Q ${25 * progress} ${100 - 20 * progress}, ${50 * progress} ${100 - 40 * progress} T ${100 * progress} ${100 - 80 * progress}`}
+                d={`M 0 100 Q ${pathEndX * 0.4} ${100 - pathEndY * 0.3}, ${pathEndX} ${pathEndY}`}
                 stroke="url(#lineGradient)"
-                strokeWidth="0.5"
+                strokeWidth="0.8"
                 fill="none"
+                strokeLinecap="round"
                 style={{ 
                   transition: 'all 0.1s linear',
                 }}
@@ -195,7 +196,7 @@ export const Crash = (): JSX.Element => {
               style={{ 
                 left: `${point.x}%`,
                 top: `${point.y}%`,
-                transform: `translate(-50%, -50%) rotate(${progress * 45}deg)`,
+                transform: `translate(-50%, -50%) rotate(-15deg)`,
               }}
               alt="Flying pug"
               src="/figmaAssets/puppy-pug-1-5.png"
@@ -204,9 +205,10 @@ export const Crash = (): JSX.Element => {
         );
       
       case "crashed":
-        const crashProgress = 1;
-        const crashX = 75;
-        const crashY = 30;
+        const crashProgress = Math.min((gameState.crashPoint - 1) / 5, 0.8);
+        const crashPoint = getPointOnCurve(crashProgress);
+        const crashPathX = crashPoint.x;
+        const crashPathY = crashPoint.y;
         
         return (
           <>
@@ -220,24 +222,25 @@ export const Crash = (): JSX.Element => {
             </div>
             <svg className="absolute bottom-0 left-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               <defs>
-                <linearGradient id="crashGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <linearGradient id="crashGradient" x1="0%" y1="100%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="#ff5f5f" />
                   <stop offset="100%" stopColor="#ff5f5f" />
                 </linearGradient>
               </defs>
               <path
-                d="M 0 100 Q 25 80, 50 60 T 75 30 L 80 85"
+                d={`M 0 100 Q ${crashPathX * 0.4} ${100 - crashPathY * 0.3}, ${crashPathX} ${crashPathY} L ${crashPathX + 5} ${crashPathY + 30}`}
                 stroke="url(#crashGradient)"
-                strokeWidth="0.5"
+                strokeWidth="0.8"
                 fill="none"
+                strokeLinecap="round"
               />
             </svg>
             <img
               className="absolute w-[60px] sm:w-[80px] md:w-[100px] h-[60px] sm:h-[80px] md:h-[100px] object-cover"
               style={{ 
-                left: `${crashX}%`,
-                top: `${crashY}%`,
-                transform: 'translate(-50%, -50%) rotate(90deg)',
+                left: `${crashPathX}%`,
+                top: `${crashPathY}%`,
+                transform: 'translate(-50%, -50%) rotate(-15deg)',
               }}
               alt="Crashed pug"
               src="/figmaAssets/puppy-pug-1-5.png"
