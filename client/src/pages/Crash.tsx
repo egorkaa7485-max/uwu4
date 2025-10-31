@@ -129,10 +129,18 @@ export const Crash = (): JSX.Element => {
     }
   };
 
-  const getPointOnCurve = (t: number) => {
-    const clampedT = Math.min(t, 0.8);
-    const x = clampedT * 85;
-    const y = 100 - (clampedT * 60);
+  const getPointOnCurve = (t: number, multiplier: number) => {
+    let progress;
+    if (multiplier <= 2) {
+      progress = (multiplier - 1) * 0.7;
+    } else {
+      const remainingProgress = multiplier - 2;
+      progress = 0.7 + (remainingProgress * 0.05);
+    }
+    
+    const clampedProgress = Math.min(progress, 0.85);
+    const x = clampedProgress * 70;
+    const y = 100 - (clampedProgress * 50 + Math.sin(clampedProgress * Math.PI * 0.5) * 10);
     return { x, y };
   };
 
@@ -158,13 +166,74 @@ export const Crash = (): JSX.Element => {
         );
       
       case "flying":
-        const progress = Math.min((gameState.multiplier - 1) / 5, 1);
-        const point = getPointOnCurve(progress);
+        const point = getPointOnCurve(0, gameState.multiplier);
         const pathEndX = point.x;
         const pathEndY = point.y;
         
+        const isStarPhase = gameState.multiplier >= 3;
+        
         return (
           <>
+            {isStarPhase ? (
+              <div className="absolute inset-0 overflow-hidden">
+                {Array.from({ length: 50 }).map((_, i) => {
+                  const startX = Math.random() * 100;
+                  const startY = Math.random() * 100;
+                  const speed = 0.5 + Math.random() * 1;
+                  const size = 1 + Math.random() * 2;
+                  
+                  return (
+                    <div
+                      key={`star-${i}`}
+                      className="absolute w-1 h-1 bg-white rounded-full opacity-70"
+                      style={{
+                        left: `${startX}%`,
+                        top: `${startY}%`,
+                        width: `${size}px`,
+                        height: `${size}px`,
+                        animation: `starFall ${3 / speed}s linear infinite`,
+                        animationDelay: `${Math.random() * 2}s`,
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="absolute inset-0 overflow-hidden opacity-30">
+                {Array.from({ length: 8 }).map((_, i) => {
+                  const height = 30 + Math.random() * 40;
+                  const width = 15 + Math.random() * 20;
+                  const left = (i * 15) % 120;
+                  
+                  return (
+                    <div
+                      key={`building-${i}`}
+                      className="absolute bottom-0 bg-gradient-to-t from-gray-700 to-gray-600 rounded-t-sm"
+                      style={{
+                        left: `${left}%`,
+                        width: `${width}px`,
+                        height: `${height}%`,
+                        animation: 'buildingMove 3s linear infinite',
+                        animationDelay: `${i * 0.3}s`,
+                      }}
+                    >
+                      <div className="grid grid-cols-2 gap-1 p-1 h-full">
+                        {Array.from({ length: 8 }).map((_, j) => (
+                          <div
+                            key={j}
+                            className="bg-yellow-200 opacity-50 rounded-sm"
+                            style={{
+                              opacity: Math.random() > 0.5 ? 0.5 : 0,
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            
             <div className="absolute top-4 sm:top-12 left-3 sm:left-5 flex flex-col items-start z-10">
               <div className="font-bold text-[48px] sm:text-[64px] tracking-[-1.28px] [font-family:'Inter',Helvetica] text-[#c3ff00] leading-[normal]">
                 x{gameState.multiplier.toFixed(2)}
@@ -173,15 +242,17 @@ export const Crash = (): JSX.Element => {
                 Fly
               </div>
             </div>
+            
             <svg className="absolute bottom-0 left-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="lineGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#c3ff00" />
+                  <stop offset="0%" stopColor="#c3ff00" stopOpacity="0.3" />
+                  <stop offset="50%" stopColor="#c3ff00" />
                   <stop offset="100%" stopColor="#c3ff00" />
                 </linearGradient>
               </defs>
               <path
-                d={`M 0 100 Q ${pathEndX * 0.4} ${100 - pathEndY * 0.3}, ${pathEndX} ${pathEndY}`}
+                d={`M 0 100 Q ${pathEndX * 0.5} ${100 + 10}, ${pathEndX} ${pathEndY}`}
                 stroke="url(#lineGradient)"
                 strokeWidth="0.8"
                 fill="none"
@@ -191,8 +262,11 @@ export const Crash = (): JSX.Element => {
                 }}
               />
             </svg>
+            
+            <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[#1a1a2b] to-transparent pointer-events-none z-5" />
+            
             <img
-              className="absolute w-[60px] sm:w-[80px] md:w-[100px] h-[60px] sm:h-[80px] md:h-[100px] object-cover transition-all duration-100"
+              className="absolute w-[60px] sm:w-[80px] md:w-[100px] h-[60px] sm:h-[80px] md:h-[100px] object-cover transition-all duration-100 z-10"
               style={{ 
                 left: `${point.x}%`,
                 top: `${point.y}%`,
@@ -205,13 +279,51 @@ export const Crash = (): JSX.Element => {
         );
       
       case "crashed":
-        const crashProgress = Math.min((gameState.crashPoint - 1) / 5, 0.8);
-        const crashPoint = getPointOnCurve(crashProgress);
+        const crashPoint = getPointOnCurve(0, gameState.crashPoint);
         const crashPathX = crashPoint.x;
         const crashPathY = crashPoint.y;
         
+        const wasCrashInStarPhase = gameState.crashPoint >= 3;
+        
         return (
           <>
+            {wasCrashInStarPhase ? (
+              <div className="absolute inset-0 overflow-hidden">
+                {Array.from({ length: 50 }).map((_, i) => (
+                  <div
+                    key={`star-crash-${i}`}
+                    className="absolute w-1 h-1 bg-white rounded-full opacity-50"
+                    style={{
+                      left: `${Math.random() * 100}%`,
+                      top: `${Math.random() * 100}%`,
+                      width: `${1 + Math.random() * 2}px`,
+                      height: `${1 + Math.random() * 2}px`,
+                    }}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="absolute inset-0 overflow-hidden opacity-30">
+                {Array.from({ length: 8 }).map((_, i) => {
+                  const height = 30 + Math.random() * 40;
+                  const width = 15 + Math.random() * 20;
+                  const left = (i * 15) % 120;
+                  
+                  return (
+                    <div
+                      key={`building-crash-${i}`}
+                      className="absolute bottom-0 bg-gradient-to-t from-gray-700 to-gray-600 rounded-t-sm"
+                      style={{
+                        left: `${left}%`,
+                        width: `${width}px`,
+                        height: `${height}%`,
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            )}
+            
             <div className="absolute top-4 sm:top-12 left-3 sm:left-5 flex flex-col items-start z-10">
               <div className="font-bold text-[48px] sm:text-[64px] tracking-[-1.28px] [font-family:'Inter',Helvetica] text-[#ff5f5f] leading-[normal]">
                 x{gameState.multiplier.toFixed(2)}
@@ -220,27 +332,32 @@ export const Crash = (): JSX.Element => {
                 Crash
               </div>
             </div>
+            
             <svg className="absolute bottom-0 left-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="crashGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#ff5f5f" />
+                  <stop offset="0%" stopColor="#ff5f5f" stopOpacity="0.3" />
+                  <stop offset="50%" stopColor="#ff5f5f" />
                   <stop offset="100%" stopColor="#ff5f5f" />
                 </linearGradient>
               </defs>
               <path
-                d={`M 0 100 Q ${crashPathX * 0.4} ${100 - crashPathY * 0.3}, ${crashPathX} ${crashPathY} L ${crashPathX + 5} ${crashPathY + 30}`}
+                d={`M 0 100 Q ${crashPathX * 0.5} ${100 + 10}, ${crashPathX} ${crashPathY} L ${crashPathX + 5} ${Math.min(crashPathY + 30, 100)}`}
                 stroke="url(#crashGradient)"
                 strokeWidth="0.8"
                 fill="none"
                 strokeLinecap="round"
               />
             </svg>
+            
+            <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[#1a1a2b] to-transparent pointer-events-none z-5" />
+            
             <img
-              className="absolute w-[60px] sm:w-[80px] md:w-[100px] h-[60px] sm:h-[80px] md:h-[100px] object-cover"
+              className="absolute w-[60px] sm:w-[80px] md:w-[100px] h-[60px] sm:h-[80px] md:h-[100px] object-cover z-10"
               style={{ 
                 left: `${crashPathX}%`,
                 top: `${crashPathY}%`,
-                transform: 'translate(-50%, -50%) rotate(-15deg)',
+                transform: 'translate(-50%, -50%) rotate(90deg)',
               }}
               alt="Crashed pug"
               src="/figmaAssets/puppy-pug-1-5.png"
