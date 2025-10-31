@@ -312,14 +312,22 @@ export const Crash = (): JSX.Element => {
             
             <svg className="absolute bottom-0 left-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               <defs>
-                <linearGradient id="crashLineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <linearGradient id="redLineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#ff5f5f" />
                   <stop offset="100%" stopColor="#ff5f5f" stopOpacity="0.3" />
                 </linearGradient>
+                <linearGradient id="redGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#ff5f5f" stopOpacity="0.15" />
+                  <stop offset="100%" stopColor="#ff5f5f" stopOpacity="0" />
+                </linearGradient>
               </defs>
               <path
-                d={`M ${crashPathX} ${crashPathY} L ${crashPathX + 5} ${Math.min(crashPathY + 30, 100)}`}
-                stroke="url(#crashLineGradient)"
+                d={`M 0 100 Q ${crashPathX * 0.5} ${100 + 10}, ${crashPathX} ${crashPathY} L ${crashPathX} 100 L 0 100 Z`}
+                fill="url(#redGlow)"
+              />
+              <path
+                d={`M 0 100 Q ${crashPathX * 0.5} ${100 + 10}, ${crashPathX} ${crashPathY}`}
+                stroke="url(#redLineGradient)"
                 strokeWidth="0.8"
                 fill="none"
                 strokeLinecap="round"
@@ -419,43 +427,59 @@ export const Crash = (): JSX.Element => {
       <main className="flex flex-col px-4 sm:px-6 md:px-8 gap-3 sm:gap-4 pb-20 md:pb-8">
         <section className="relative w-full h-[220px] sm:h-[261px] md:h-[300px] lg:h-[350px] rounded-3xl bg-[linear-gradient(180deg,rgba(26,26,43,1)_0%,rgba(21,21,26,1)_100%)] overflow-hidden">
           {gameState.phase === "flying" && gameState.multiplier < 2.5 && (
-            <>
-              <img
-                className="absolute inset-0 w-full h-full object-cover"
-                alt="Mask group"
-                src="/figmaAssets/mask-group.png"
-              />
-              <div className="absolute inset-0 overflow-hidden opacity-80">
-                {Array.from({ length: 25 }).map((_, i) => {
-                  const height = 40 + Math.random() * 60;
-                  const width = 20 + Math.random() * 40;
-                  const startLeft = 100 + (i * 6);
-                  const delay = i * 0.15;
-                  const duration = 8 + Math.random() * 4;
-                  
-                  return (
-                    <div
-                      key={`building-${i}`}
-                      className="absolute bottom-0 bg-black/60"
-                      style={{
-                        left: `${startLeft}%`,
-                        width: `${width}px`,
-                        height: `${height}%`,
-                        animation: `buildingMove ${duration}s linear infinite`,
-                        animationDelay: `${delay}s`,
-                      }}
-                    />
-                  );
-                })}
-              </div>
-            </>
+            <div className="absolute inset-0 overflow-hidden">
+              {Array.from({ length: 20 }).map((_, i) => {
+                const baseHeight = 30 + (i % 3) * 15;
+                const width = 25 + (i % 4) * 10;
+                const initialLeft = (i * 8) - 10;
+                const progress = Math.min(gameState.multiplier / 2.5, 1);
+                const heightScale = 1 - (progress * 0.4);
+                const translateX = -(progress * 150);
+                const translateY = progress * 15;
+                
+                return (
+                  <div
+                    key={`rect-${i}`}
+                    className="absolute bottom-0 bg-black"
+                    style={{
+                      left: `${initialLeft}%`,
+                      width: `${width}px`,
+                      height: `${baseHeight}%`,
+                      transform: `translate(${translateX}%, ${translateY}%) scaleY(${heightScale})`,
+                      transformOrigin: 'bottom',
+                      transition: 'transform 0.1s linear',
+                    }}
+                  />
+                );
+              })}
+            </div>
           )}
           {gameState.phase === "crashed" && gameState.crashPoint < 2.5 && (
-            <img
-              className="absolute inset-0 w-full h-full object-cover"
-              alt="Mask group"
-              src="/figmaAssets/mask-group.png"
-            />
+            <div className="absolute inset-0 overflow-hidden">
+              {Array.from({ length: 20 }).map((_, i) => {
+                const baseHeight = 30 + (i % 3) * 15;
+                const width = 25 + (i % 4) * 10;
+                const initialLeft = (i * 8) - 10;
+                const progress = Math.min(gameState.crashPoint / 2.5, 1);
+                const heightScale = 1 - (progress * 0.4);
+                const translateX = -(progress * 150);
+                const translateY = progress * 15;
+                
+                return (
+                  <div
+                    key={`rect-crash-${i}`}
+                    className="absolute bottom-0 bg-black"
+                    style={{
+                      left: `${initialLeft}%`,
+                      width: `${width}px`,
+                      height: `${baseHeight}%`,
+                      transform: `translate(${translateX}%, ${translateY}%) scaleY(${heightScale})`,
+                      transformOrigin: 'bottom',
+                    }}
+                  />
+                );
+              })}
+            </div>
           )}
 
           {getGameAreaContent()}
