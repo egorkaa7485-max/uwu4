@@ -173,7 +173,7 @@ export class CrashGame {
   private getState(): GameState {
     return {
       phase: this.phase,
-      multiplier: Math.round(this.multiplier * 10) / 10,
+      multiplier: Math.round(this.multiplier * 100) / 100,
       crashPoint: this.crashPoint,
       timeRemaining: this.timeRemaining,
       history: this.history

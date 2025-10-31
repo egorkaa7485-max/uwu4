@@ -151,27 +151,52 @@ export const Crash = (): JSX.Element => {
         );
       
       case "flying":
+        const progress = Math.min((gameState.multiplier - 1) / 5, 1);
+        const pathProgress = progress * 100;
+        
+        const getPointOnPath = (progress: number) => {
+          const t = progress;
+          const x = t * 100;
+          const y = 100 - (t * 80 + Math.sin(t * Math.PI) * 20);
+          return { x, y };
+        };
+        
+        const point = getPointOnPath(progress);
+        
         return (
           <>
-            <div className="absolute top-12 left-5 flex flex-col items-start z-10">
-              <div className="font-bold text-[64px] tracking-[-1.28px] [font-family:'Inter',Helvetica] text-[#c3ff00] leading-[normal]">
+            <div className="absolute top-4 sm:top-12 left-3 sm:left-5 flex flex-col items-start z-10">
+              <div className="font-bold text-[48px] sm:text-[64px] tracking-[-1.28px] [font-family:'Inter',Helvetica] text-[#c3ff00] leading-[normal]">
                 x{gameState.multiplier.toFixed(2)}
               </div>
               <div className="[font-family:'Inter',Helvetica] font-medium text-[#c3ff00] text-xs tracking-[-0.24px] leading-[normal]">
                 Fly
               </div>
             </div>
-            <svg className="absolute bottom-0 left-0 w-full h-full" viewBox="0 0 358 261" fill="none">
+            <svg className="absolute bottom-0 left-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#c3ff00" />
+                  <stop offset="100%" stopColor="#c3ff00" />
+                </linearGradient>
+              </defs>
               <path
-                d="M 0 261 Q 90 200, 180 120 T 358 0"
-                stroke="#c3ff00"
-                strokeWidth="3"
+                d={`M 0 100 Q ${25 * progress} ${100 - 20 * progress}, ${50 * progress} ${100 - 40 * progress} T ${100 * progress} ${100 - 80 * progress}`}
+                stroke="url(#lineGradient)"
+                strokeWidth="0.5"
                 fill="none"
+                style={{ 
+                  transition: 'all 0.1s linear',
+                }}
               />
             </svg>
             <img
-              className="absolute top-[50px] right-[30px] w-[100px] h-[100px] object-cover transition-transform duration-100"
-              style={{ transform: `translateY(-${(gameState.multiplier - 1) * 30}px)` }}
+              className="absolute w-[60px] sm:w-[80px] md:w-[100px] h-[60px] sm:h-[80px] md:h-[100px] object-cover transition-all duration-100"
+              style={{ 
+                left: `${point.x}%`,
+                top: `${point.y}%`,
+                transform: `translate(-50%, -50%) rotate(${progress * 45}deg)`,
+              }}
               alt="Flying pug"
               src="/figmaAssets/puppy-pug-1-5.png"
             />
@@ -179,26 +204,41 @@ export const Crash = (): JSX.Element => {
         );
       
       case "crashed":
+        const crashProgress = 1;
+        const crashX = 75;
+        const crashY = 30;
+        
         return (
           <>
-            <div className="absolute top-12 left-5 flex flex-col items-start z-10">
-              <div className="font-bold text-[64px] tracking-[-1.28px] [font-family:'Inter',Helvetica] text-[#ff5f5f] leading-[normal]">
+            <div className="absolute top-4 sm:top-12 left-3 sm:left-5 flex flex-col items-start z-10">
+              <div className="font-bold text-[48px] sm:text-[64px] tracking-[-1.28px] [font-family:'Inter',Helvetica] text-[#ff5f5f] leading-[normal]">
                 x{gameState.multiplier.toFixed(2)}
               </div>
               <div className="[font-family:'Inter',Helvetica] font-medium text-[#ff5f5f] text-xs tracking-[-0.24px] leading-[normal]">
                 Crash
               </div>
             </div>
-            <svg className="absolute bottom-0 left-0 w-full h-full" viewBox="0 0 358 261" fill="none">
+            <svg className="absolute bottom-0 left-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="crashGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#ff5f5f" />
+                  <stop offset="100%" stopColor="#ff5f5f" />
+                </linearGradient>
+              </defs>
               <path
-                d="M 0 261 Q 90 200, 180 120 T 250 150 L 260 240"
-                stroke="#ff5f5f"
-                strokeWidth="3"
+                d="M 0 100 Q 25 80, 50 60 T 75 30 L 80 85"
+                stroke="url(#crashGradient)"
+                strokeWidth="0.5"
                 fill="none"
               />
             </svg>
             <img
-              className="absolute bottom-[30px] right-[50px] w-[100px] h-[100px] object-cover"
+              className="absolute w-[60px] sm:w-[80px] md:w-[100px] h-[60px] sm:h-[80px] md:h-[100px] object-cover"
+              style={{ 
+                left: `${crashX}%`,
+                top: `${crashY}%`,
+                transform: 'translate(-50%, -50%) rotate(90deg)',
+              }}
               alt="Crashed pug"
               src="/figmaAssets/puppy-pug-1-5.png"
             />
@@ -248,13 +288,13 @@ export const Crash = (): JSX.Element => {
   };
 
   return (
-    <div className="bg-[#0f0f12] overflow-hidden w-full min-w-[390px] min-h-[840px] relative flex flex-col">
-      <div className="absolute w-full left-0 bottom-0 h-[34px] flex items-end justify-center z-50">
+    <div className="bg-[#0f0f12] overflow-hidden w-full min-h-screen relative flex flex-col">
+      <div className="absolute w-full left-0 bottom-0 h-[34px] flex items-end justify-center z-50 md:hidden">
         <div className="mb-2 w-[139px] h-[5px] bg-white rounded-[100px]" />
       </div>
 
-      <header className="flex w-full items-center justify-between px-4 pt-[102px] pb-6">
-        <Avatar className="w-9 h-9">
+      <header className="flex w-full items-center justify-between px-4 sm:px-6 md:px-8 pt-8 sm:pt-12 md:pt-16 pb-4 sm:pb-6">
+        <Avatar className="w-8 h-8 sm:w-9 sm:h-9">
           <AvatarImage
             src="/figmaAssets/ellipse-34-5.png"
             alt="Profile"
@@ -262,28 +302,28 @@ export const Crash = (): JSX.Element => {
           />
         </Avatar>
 
-        <Button className="h-9 px-4 bg-[#c3ff00] hover:bg-[#c3ff00]/90 rounded-3xl">
+        <Button className="h-8 sm:h-9 px-3 sm:px-4 bg-[#c3ff00] hover:bg-[#c3ff00]/90 rounded-3xl">
           <span className="[font-family:'Inter',Helvetica] font-bold text-[#242424] text-xs tracking-[-0.24px]">
             Connect Wallet
           </span>
         </Button>
       </header>
 
-      <div className="inline-flex items-center justify-center gap-1.5 px-4 pb-4">
+      <div className="inline-flex items-center justify-center gap-1.5 px-4 sm:px-6 md:px-8 pb-3 sm:pb-4">
         <img
-          className="w-6 h-6"
+          className="w-5 h-5 sm:w-6 sm:h-6"
           alt="Solar round double"
           src="/figmaAssets/solar-round-double-alt-arrow-down-bold.svg"
         />
-        <h1 className="[font-family:'Inter',Helvetica] font-bold text-white text-2xl tracking-[-0.48px]">
+        <h1 className="[font-family:'Inter',Helvetica] font-bold text-white text-xl sm:text-2xl tracking-[-0.48px]">
           Crash
         </h1>
       </div>
 
-      <main className="flex flex-col px-4 gap-4">
-        <section className="relative w-full h-[261px] rounded-3xl bg-[linear-gradient(180deg,rgba(26,26,43,1)_0%,rgba(21,21,26,1)_100%)] overflow-hidden">
+      <main className="flex flex-col px-4 sm:px-6 md:px-8 gap-3 sm:gap-4 pb-20 md:pb-8">
+        <section className="relative w-full h-[220px] sm:h-[261px] md:h-[300px] lg:h-[350px] rounded-3xl bg-[linear-gradient(180deg,rgba(26,26,43,1)_0%,rgba(21,21,26,1)_100%)] overflow-hidden">
           <img
-            className="absolute inset-0 w-full h-full"
+            className="absolute inset-0 w-full h-full object-cover"
             alt="Mask group"
             src="/figmaAssets/mask-group.png"
           />
@@ -300,24 +340,24 @@ export const Crash = (): JSX.Element => {
 
         <TimerSection history={gameState.history} />
 
-        <section className="w-full bg-[#15151a] rounded-2xl p-6">
-          <div className="flex flex-col gap-[13px]">
-            <div className="flex items-end gap-[5px] w-full">
-              <div className="flex flex-col w-[200px] items-start gap-[3px]">
+        <section className="w-full bg-[#15151a] rounded-2xl p-4 sm:p-6">
+          <div className="flex flex-col gap-3 sm:gap-[13px]">
+            <div className="flex items-end gap-1 sm:gap-[5px] w-full">
+              <div className="flex flex-col flex-1 sm:w-[200px] items-start gap-[3px]">
                 <label className="opacity-50 [font-family:'Inter',Helvetica] font-semibold text-white text-xs tracking-[-0.24px]">
                   Bet
                 </label>
 
-                <div className="flex items-center gap-1.5 px-4 py-2.5 w-full bg-[#18181f] rounded-2xl">
+                <div className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 w-full bg-[#18181f] rounded-2xl">
                   <Input
                     type="number"
                     value={betAmount}
                     onChange={(e) => handleBetAmountChange(e.target.value)}
-                    className="bg-transparent border-0 p-0 h-auto text-white font-semibold text-base tracking-[-0.32px] [font-family:'Inter',Helvetica] w-full focus-visible:ring-0"
+                    className="bg-transparent border-0 p-0 h-auto text-white font-semibold text-sm sm:text-base tracking-[-0.32px] [font-family:'Inter',Helvetica] w-full focus-visible:ring-0"
                   />
 
                   <img
-                    className="w-[18px] h-[18px]"
+                    className="w-4 sm:w-[18px] h-4 sm:h-[18px]"
                     alt="Simple icons ton"
                     src="/figmaAssets/simple-icons-ton-1.svg"
                   />
@@ -327,7 +367,7 @@ export const Crash = (): JSX.Element => {
               <Button
                 onClick={multiplyBet}
                 variant="ghost"
-                className="w-[50px] h-[39px] bg-[#18181f] hover:bg-[#18181f]/80 rounded-2xl p-0"
+                className="w-12 sm:w-[50px] h-[35px] sm:h-[39px] bg-[#18181f] hover:bg-[#18181f]/80 rounded-2xl p-0"
               >
                 <span className="text-xs tracking-[-0.24px] [font-family:'Inter',Helvetica] font-semibold text-white">
                   x2
@@ -337,7 +377,7 @@ export const Crash = (): JSX.Element => {
               <Button
                 onClick={divideBet}
                 variant="ghost"
-                className="w-[50px] h-[39px] bg-[#18181f] hover:bg-[#18181f]/80 rounded-2xl p-0"
+                className="w-12 sm:w-[50px] h-[35px] sm:h-[39px] bg-[#18181f] hover:bg-[#18181f]/80 rounded-2xl p-0"
               >
                 <span className="font-semibold text-xs tracking-[-0.24px] [font-family:'Inter',Helvetica] text-white">
                   /2
@@ -346,19 +386,19 @@ export const Crash = (): JSX.Element => {
             </div>
 
             <div className="flex items-end gap-1 w-full">
-              <div className="flex flex-col w-[200px] items-start gap-2">
+              <div className="flex flex-col flex-1 sm:w-[200px] items-start gap-2">
                 <label className="opacity-50 [font-family:'Inter',Helvetica] font-semibold text-white text-xs tracking-[-0.24px]">
                   Auto-cashout
                 </label>
 
-                <div className="flex items-center gap-1.5 px-4 py-2.5 w-full bg-[#18181f] rounded-2xl">
+                <div className="flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 w-full bg-[#18181f] rounded-2xl">
                   <Input
                     type="number"
                     value={autoCashout}
                     onChange={(e) => handleAutoCashoutChange(e.target.value)}
                     step="0.01"
                     disabled={!autoCashoutEnabled}
-                    className="bg-transparent border-0 p-0 h-auto text-white font-semibold text-base tracking-[-0.32px] [font-family:'Inter',Helvetica] w-full focus-visible:ring-0"
+                    className="bg-transparent border-0 p-0 h-auto text-white font-semibold text-sm sm:text-base tracking-[-0.32px] [font-family:'Inter',Helvetica] w-full focus-visible:ring-0"
                   />
                 </div>
               </div>
@@ -366,7 +406,7 @@ export const Crash = (): JSX.Element => {
               <Button
                 onClick={() => setAutoCashoutEnabled(!autoCashoutEnabled)}
                 variant="ghost"
-                className={`w-[106px] h-[39px] ${autoCashoutEnabled ? 'bg-[#c3ff001a]' : 'bg-[#18181f]'} hover:opacity-80 rounded-2xl p-0`}
+                className={`w-20 sm:w-[106px] h-[35px] sm:h-[39px] ${autoCashoutEnabled ? 'bg-[#c3ff001a]' : 'bg-[#18181f]'} hover:opacity-80 rounded-2xl p-0`}
               >
                 <span className={`[font-family:'Inter',Helvetica] font-bold ${autoCashoutEnabled ? 'text-[#c3ff00]' : 'text-white'} text-xs tracking-[-0.24px]`}>
                   {autoCashoutEnabled ? "ON" : "OFF"}
