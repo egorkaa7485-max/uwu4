@@ -170,11 +170,34 @@ export const Crash = (): JSX.Element => {
         const pathEndX = point.x;
         const pathEndY = point.y;
         
-        const isStarPhase = gameState.multiplier >= 3;
+        const isStarPhase = gameState.multiplier >= 2;
         
         return (
           <>
-            {isStarPhase ? (
+            <div className="absolute inset-0 overflow-hidden opacity-40">
+              {!isStarPhase && Array.from({ length: 15 }).map((_, i) => {
+                const height = 30 + Math.random() * 60;
+                const width = 15 + Math.random() * 30;
+                const left = (i * 10) % 120;
+                const delay = i * 0.3;
+                
+                return (
+                  <div
+                    key={`rect-${i}`}
+                    className="absolute bottom-0 bg-black"
+                    style={{
+                      left: `${left}%`,
+                      width: `${width}px`,
+                      height: `${height}%`,
+                      animation: 'rectangleMove 6s linear infinite',
+                      animationDelay: `${delay}s`,
+                    }}
+                  />
+                );
+              })}
+            </div>
+            
+            {isStarPhase && (
               <div className="absolute inset-0 overflow-hidden">
                 {Array.from({ length: 50 }).map((_, i) => {
                   const startX = Math.random() * 100;
@@ -198,29 +221,6 @@ export const Crash = (): JSX.Element => {
                   );
                 })}
               </div>
-            ) : (
-              <div className="absolute inset-0 overflow-hidden opacity-40">
-                {Array.from({ length: 12 }).map((_, i) => {
-                  const height = 20 + Math.random() * 50;
-                  const width = 10 + Math.random() * 25;
-                  const left = (i * 12) % 130;
-                  const delay = i * 0.2;
-                  
-                  return (
-                    <div
-                      key={`rect-${i}`}
-                      className="absolute bottom-0 bg-black"
-                      style={{
-                        left: `${left}%`,
-                        width: `${width}px`,
-                        height: `${height}%`,
-                        animation: 'rectangleMove 4s linear infinite',
-                        animationDelay: `${delay}s`,
-                      }}
-                    />
-                  );
-                })}
-              </div>
             )}
             
             <div className="absolute top-4 sm:top-12 left-3 sm:left-5 flex flex-col items-start z-10">
@@ -235,11 +235,22 @@ export const Crash = (): JSX.Element => {
             <svg className="absolute bottom-0 left-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="lineGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#c3ff00" stopOpacity="0.3" />
+                  <stop offset="0%" stopColor="#c3ff00" stopOpacity="0.5" />
                   <stop offset="50%" stopColor="#c3ff00" />
                   <stop offset="100%" stopColor="#c3ff00" />
                 </linearGradient>
+                <linearGradient id="yellowGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#c3ff00" stopOpacity="0.15" />
+                  <stop offset="100%" stopColor="#c3ff00" stopOpacity="0" />
+                </linearGradient>
               </defs>
+              <path
+                d={`M 0 100 Q ${pathEndX * 0.5} ${100 + 10}, ${pathEndX} ${pathEndY} L ${pathEndX} 100 L 0 100 Z`}
+                fill="url(#yellowGlow)"
+                style={{ 
+                  transition: 'all 0.1s linear',
+                }}
+              />
               <path
                 d={`M 0 100 Q ${pathEndX * 0.5} ${100 + 10}, ${pathEndX} ${pathEndY}`}
                 stroke="url(#lineGradient)"
@@ -272,11 +283,31 @@ export const Crash = (): JSX.Element => {
         const crashPathX = crashPoint.x;
         const crashPathY = crashPoint.y;
         
-        const wasCrashInStarPhase = gameState.crashPoint >= 3;
+        const wasCrashInStarPhase = gameState.crashPoint >= 2;
         
         return (
           <>
-            {wasCrashInStarPhase ? (
+            <div className="absolute inset-0 overflow-hidden opacity-40">
+              {!wasCrashInStarPhase && Array.from({ length: 15 }).map((_, i) => {
+                const height = 30 + Math.random() * 60;
+                const width = 15 + Math.random() * 30;
+                const left = (i * 10) % 120;
+                
+                return (
+                  <div
+                    key={`rect-crash-${i}`}
+                    className="absolute bottom-0 bg-black"
+                    style={{
+                      left: `${left}%`,
+                      width: `${width}px`,
+                      height: `${height}%`,
+                    }}
+                  />
+                );
+              })}
+            </div>
+            
+            {wasCrashInStarPhase && (
               <div className="absolute inset-0 overflow-hidden">
                 {Array.from({ length: 50 }).map((_, i) => (
                   <div
@@ -290,26 +321,6 @@ export const Crash = (): JSX.Element => {
                     }}
                   />
                 ))}
-              </div>
-            ) : (
-              <div className="absolute inset-0 overflow-hidden opacity-40">
-                {Array.from({ length: 12 }).map((_, i) => {
-                  const height = 20 + Math.random() * 50;
-                  const width = 10 + Math.random() * 25;
-                  const left = (i * 12) % 130;
-                  
-                  return (
-                    <div
-                      key={`rect-crash-${i}`}
-                      className="absolute bottom-0 bg-black"
-                      style={{
-                        left: `${left}%`,
-                        width: `${width}px`,
-                        height: `${height}%`,
-                      }}
-                    />
-                  );
-                })}
               </div>
             )}
             
@@ -325,11 +336,19 @@ export const Crash = (): JSX.Element => {
             <svg className="absolute bottom-0 left-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="crashGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#ff5f5f" stopOpacity="0.3" />
+                  <stop offset="0%" stopColor="#ff5f5f" stopOpacity="0.5" />
                   <stop offset="50%" stopColor="#ff5f5f" />
                   <stop offset="100%" stopColor="#ff5f5f" />
                 </linearGradient>
+                <linearGradient id="redGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#ff5f5f" stopOpacity="0.15" />
+                  <stop offset="100%" stopColor="#ff5f5f" stopOpacity="0" />
+                </linearGradient>
               </defs>
+              <path
+                d={`M 0 100 Q ${crashPathX * 0.5} ${100 + 10}, ${crashPathX} ${crashPathY} L ${crashPathX} 100 L 0 100 Z`}
+                fill="url(#redGlow)"
+              />
               <path
                 d={`M 0 100 Q ${crashPathX * 0.5} ${100 + 10}, ${crashPathX} ${crashPathY} L ${crashPathX + 5} ${Math.min(crashPathY + 30, 100)}`}
                 stroke="url(#crashGradient)"
