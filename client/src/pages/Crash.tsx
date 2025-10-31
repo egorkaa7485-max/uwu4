@@ -22,10 +22,10 @@ export const Crash = (): JSX.Element => {
     multiplier: 1.0,
     crashPoint: 0,
     timeRemaining: 25,
-    history: [21, 2.3, 1.2, 3.1, 23, 15, 17, 3.5, 3.5, 3.5, 3.5]
+    history: []
   });
   
-  const [betAmount, setBetAmount] = useState(32);
+  const [betAmount, setBetAmount] = useState<number | ''>('');
   const [autoCashout, setAutoCashout] = useState(2);
   const [autoCashoutEnabled, setAutoCashoutEnabled] = useState(true);
   const [hasBet, setHasBet] = useState(false);
@@ -50,7 +50,16 @@ export const Crash = (): JSX.Element => {
       const data = JSON.parse(event.data);
       
       if (data.type === "gameState") {
-        setGameState(data.state);
+        setGameState(prevState => {
+          const newState = data.state;
+          
+          if (newState.phase === "crashed" && prevState.phase !== "crashed") {
+            const updatedHistory = [newState.crashPoint, ...prevState.history].slice(0, 15);
+            return { ...newState, history: updatedHistory };
+          }
+          
+          return { ...newState, history: prevState.history };
+        });
         
         if (data.state.phase === "crashed") {
           setHasBet(false);
@@ -88,6 +97,10 @@ export const Crash = (): JSX.Element => {
   }, []);
 
   const handleBetAmountChange = (value: string) => {
+    if (value === '') {
+      setBetAmount('');
+      return;
+    }
     const num = parseFloat(value);
     if (!isNaN(num) && num >= 0) {
       setBetAmount(num);
@@ -102,19 +115,26 @@ export const Crash = (): JSX.Element => {
   };
 
   const multiplyBet = () => {
-    setBetAmount(prev => prev * 2);
+    setBetAmount(prev => {
+      const current = prev === '' ? 10 : prev;
+      return current * 2;
+    });
   };
 
   const divideBet = () => {
-    setBetAmount(prev => Math.max(1, prev / 2));
+    setBetAmount(prev => {
+      const current = prev === '' ? 10 : prev;
+      return Math.max(1, current / 2);
+    });
   };
 
   const placeBet = () => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      const amount = betAmount === '' ? 10 : betAmount;
       wsRef.current.send(JSON.stringify({
         type: "placeBet",
         playerId: playerId.current,
-        amount: betAmount,
+        amount: amount,
         autoCashout: autoCashoutEnabled ? autoCashout : undefined
       }));
     }
@@ -292,23 +312,14 @@ export const Crash = (): JSX.Element => {
             
             <svg className="absolute bottom-0 left-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               <defs>
-                <linearGradient id="crashGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#ff5f5f" stopOpacity="0.5" />
-                  <stop offset="50%" stopColor="#ff5f5f" />
-                  <stop offset="100%" stopColor="#ff5f5f" />
-                </linearGradient>
-                <linearGradient id="redGlow" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#ff5f5f" stopOpacity="0.15" />
-                  <stop offset="100%" stopColor="#ff5f5f" stopOpacity="0" />
+                <linearGradient id="crashLineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#ff5f5f" />
+                  <stop offset="100%" stopColor="#ff5f5f" stopOpacity="0.3" />
                 </linearGradient>
               </defs>
               <path
-                d={`M 0 100 Q ${crashPathX * 0.5} ${100 + 10}, ${crashPathX} ${crashPathY} L ${crashPathX} 100 L 0 100 Z`}
-                fill="url(#redGlow)"
-              />
-              <path
-                d={`M 0 100 Q ${crashPathX * 0.5} ${100 + 10}, ${crashPathX} ${crashPathY} L ${crashPathX + 5} ${Math.min(crashPathY + 30, 100)}`}
-                stroke="url(#crashGradient)"
+                d={`M ${crashPathX} ${crashPathY} L ${crashPathX + 5} ${Math.min(crashPathY + 30, 100)}`}
+                stroke="url(#crashLineGradient)"
                 strokeWidth="0.8"
                 fill="none"
                 strokeLinecap="round"
@@ -408,15 +419,40 @@ export const Crash = (): JSX.Element => {
       <main className="flex flex-col px-4 sm:px-6 md:px-8 gap-3 sm:gap-4 pb-20 md:pb-8">
         <section className="relative w-full h-[220px] sm:h-[261px] md:h-[300px] lg:h-[350px] rounded-3xl bg-[linear-gradient(180deg,rgba(26,26,43,1)_0%,rgba(21,21,26,1)_100%)] overflow-hidden">
           {gameState.phase === "flying" && gameState.multiplier < 2.5 && (
-            <img
-              className="absolute inset-0 w-full h-full object-contain object-center"
-              alt="Mask group"
-              src="/figmaAssets/mask-group.png"
-            />
+            <>
+              <img
+                className="absolute inset-0 w-full h-full object-cover"
+                alt="Mask group"
+                src="/figmaAssets/mask-group.png"
+              />
+              <div className="absolute inset-0 overflow-hidden opacity-80">
+                {Array.from({ length: 25 }).map((_, i) => {
+                  const height = 40 + Math.random() * 60;
+                  const width = 20 + Math.random() * 40;
+                  const startLeft = 100 + (i * 6);
+                  const delay = i * 0.15;
+                  const duration = 8 + Math.random() * 4;
+                  
+                  return (
+                    <div
+                      key={`building-${i}`}
+                      className="absolute bottom-0 bg-black/60"
+                      style={{
+                        left: `${startLeft}%`,
+                        width: `${width}px`,
+                        height: `${height}%`,
+                        animation: `buildingMove ${duration}s linear infinite`,
+                        animationDelay: `${delay}s`,
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            </>
           )}
           {gameState.phase === "crashed" && gameState.crashPoint < 2.5 && (
             <img
-              className="absolute inset-0 w-full h-full object-contain object-center"
+              className="absolute inset-0 w-full h-full object-cover"
               alt="Mask group"
               src="/figmaAssets/mask-group.png"
             />

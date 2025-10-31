@@ -197,14 +197,14 @@
   }
 }
 
-@keyframes rectangleMove {
+@keyframes buildingMove {
   0% {
-    transform: translate(100vw, -50vh) scaleY(1);
+    transform: translate(0, 0) scaleY(1);
     opacity: 1;
   }
   100% {
-    transform: translate(-100px, 100vh) scaleY(0.5);
-    opacity: 0.3;
+    transform: translate(-150vw, 20vh) scaleY(0.6);
+    opacity: 0.2;
   }
 }
 
