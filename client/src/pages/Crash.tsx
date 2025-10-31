@@ -409,14 +409,14 @@ export const Crash = (): JSX.Element => {
         <section className="relative w-full h-[220px] sm:h-[261px] md:h-[300px] lg:h-[350px] rounded-3xl bg-[linear-gradient(180deg,rgba(26,26,43,1)_0%,rgba(21,21,26,1)_100%)] overflow-hidden">
           {gameState.phase === "flying" && gameState.multiplier < 2.5 && (
             <img
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-contain object-center"
               alt="Mask group"
               src="/figmaAssets/mask-group.png"
             />
           )}
           {gameState.phase === "crashed" && gameState.crashPoint < 2.5 && (
             <img
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-contain object-center"
               alt="Mask group"
               src="/figmaAssets/mask-group.png"
             />
@@ -440,7 +440,8 @@ export const Crash = (): JSX.Element => {
                     type="number"
                     value={betAmount}
                     onChange={(e) => handleBetAmountChange(e.target.value)}
-                    className="bg-transparent border-0 p-0 h-auto text-white font-semibold text-sm sm:text-base tracking-[-0.32px] [font-family:'Inter',Helvetica] w-full focus-visible:ring-0"
+                    placeholder="10"
+                    className="bg-transparent border-0 p-0 h-auto text-white font-semibold text-sm sm:text-base tracking-[-0.32px] [font-family:'Inter',Helvetica] w-full focus-visible:ring-0 placeholder:text-white/30 placeholder:font-semibold"
                   />
 
                   <img
