@@ -174,29 +174,6 @@ export const Crash = (): JSX.Element => {
         
         return (
           <>
-            <div className="absolute inset-0 overflow-hidden opacity-50">
-              {!isStarPhase && Array.from({ length: 20 }).map((_, i) => {
-                const height = 30 + Math.random() * 60;
-                const width = 15 + Math.random() * 30;
-                const left = (i * 8) % 120;
-                const delay = i * 0.2;
-                
-                return (
-                  <div
-                    key={`rect-${i}`}
-                    className="absolute top-0 bg-black"
-                    style={{
-                      left: `${left}%`,
-                      width: `${width}px`,
-                      height: `${height}%`,
-                      animation: 'rectangleMove 5s linear infinite',
-                      animationDelay: `${delay}s`,
-                    }}
-                  />
-                );
-              })}
-            </div>
-            
             {isStarPhase && (
               <div className="absolute inset-0 overflow-hidden bg-[#0a0a15]">
                 {Array.from({ length: 80 }).map((_, i) => {
@@ -287,26 +264,6 @@ export const Crash = (): JSX.Element => {
         
         return (
           <>
-            <div className="absolute inset-0 overflow-hidden opacity-50">
-              {!wasCrashInStarPhase && Array.from({ length: 20 }).map((_, i) => {
-                const height = 30 + Math.random() * 60;
-                const width = 15 + Math.random() * 30;
-                const left = (i * 8) % 120;
-                
-                return (
-                  <div
-                    key={`rect-crash-${i}`}
-                    className="absolute top-0 bg-black"
-                    style={{
-                      left: `${left}%`,
-                      width: `${width}px`,
-                      height: `${height}%`,
-                    }}
-                  />
-                );
-              })}
-            </div>
-            
             {wasCrashInStarPhase && (
               <div className="absolute inset-0 overflow-hidden bg-[#0a0a15]">
                 {Array.from({ length: 80 }).map((_, i) => (
@@ -450,11 +407,20 @@ export const Crash = (): JSX.Element => {
 
       <main className="flex flex-col px-4 sm:px-6 md:px-8 gap-3 sm:gap-4 pb-20 md:pb-8">
         <section className="relative w-full h-[220px] sm:h-[261px] md:h-[300px] lg:h-[350px] rounded-3xl bg-[#1a1a2b] overflow-hidden">
-          <img
-            className="absolute inset-0 w-full h-full object-cover opacity-80"
-            alt="Mask group"
-            src="/figmaAssets/mask-group.png"
-          />
+          {gameState.phase !== "waiting" && gameState.multiplier < 2.5 && (
+            <img
+              className="absolute inset-0 w-full h-full object-cover"
+              alt="Mask group"
+              src="/figmaAssets/mask-group.png"
+            />
+          )}
+          {gameState.phase === "waiting" && (
+            <img
+              className="absolute inset-0 w-full h-full object-cover"
+              alt="Mask group"
+              src="/figmaAssets/mask-group.png"
+            />
+          )}
 
           {getGameAreaContent()}
         </section>
