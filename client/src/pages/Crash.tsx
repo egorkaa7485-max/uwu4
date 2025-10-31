@@ -131,16 +131,16 @@ export const Crash = (): JSX.Element => {
 
   const getPointOnCurve = (t: number, multiplier: number) => {
     let progress;
-    if (multiplier <= 2) {
-      progress = (multiplier - 1) * 0.7;
+    if (multiplier <= 2.5) {
+      progress = (multiplier - 1) * 0.5;
     } else {
-      const remainingProgress = multiplier - 2;
-      progress = 0.7 + (remainingProgress * 0.05);
+      const remainingProgress = multiplier - 2.5;
+      progress = 0.75 + (remainingProgress * 0.03);
     }
     
     const clampedProgress = Math.min(progress, 0.85);
-    const x = clampedProgress * 70;
-    const y = 100 - (clampedProgress * 50 + Math.sin(clampedProgress * Math.PI * 0.5) * 10);
+    const x = clampedProgress * 65;
+    const y = 100 - (clampedProgress * 45 + Math.sin(clampedProgress * Math.PI * 0.5) * 10);
     return { x, y };
   };
 
@@ -199,36 +199,25 @@ export const Crash = (): JSX.Element => {
                 })}
               </div>
             ) : (
-              <div className="absolute inset-0 overflow-hidden opacity-30">
-                {Array.from({ length: 8 }).map((_, i) => {
-                  const height = 30 + Math.random() * 40;
-                  const width = 15 + Math.random() * 20;
-                  const left = (i * 15) % 120;
+              <div className="absolute inset-0 overflow-hidden opacity-40">
+                {Array.from({ length: 12 }).map((_, i) => {
+                  const height = 20 + Math.random() * 50;
+                  const width = 10 + Math.random() * 25;
+                  const left = (i * 12) % 130;
+                  const delay = i * 0.2;
                   
                   return (
                     <div
-                      key={`building-${i}`}
-                      className="absolute bottom-0 bg-gradient-to-t from-gray-700 to-gray-600 rounded-t-sm"
+                      key={`rect-${i}`}
+                      className="absolute bottom-0 bg-black"
                       style={{
                         left: `${left}%`,
                         width: `${width}px`,
                         height: `${height}%`,
-                        animation: 'buildingMove 3s linear infinite',
-                        animationDelay: `${i * 0.3}s`,
+                        animation: 'rectangleMove 4s linear infinite',
+                        animationDelay: `${delay}s`,
                       }}
-                    >
-                      <div className="grid grid-cols-2 gap-1 p-1 h-full">
-                        {Array.from({ length: 8 }).map((_, j) => (
-                          <div
-                            key={j}
-                            className="bg-yellow-200 opacity-50 rounded-sm"
-                            style={{
-                              opacity: Math.random() > 0.5 ? 0.5 : 0,
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
+                    />
                   );
                 })}
               </div>
@@ -303,16 +292,16 @@ export const Crash = (): JSX.Element => {
                 ))}
               </div>
             ) : (
-              <div className="absolute inset-0 overflow-hidden opacity-30">
-                {Array.from({ length: 8 }).map((_, i) => {
-                  const height = 30 + Math.random() * 40;
-                  const width = 15 + Math.random() * 20;
-                  const left = (i * 15) % 120;
+              <div className="absolute inset-0 overflow-hidden opacity-40">
+                {Array.from({ length: 12 }).map((_, i) => {
+                  const height = 20 + Math.random() * 50;
+                  const width = 10 + Math.random() * 25;
+                  const left = (i * 12) % 130;
                   
                   return (
                     <div
-                      key={`building-crash-${i}`}
-                      className="absolute bottom-0 bg-gradient-to-t from-gray-700 to-gray-600 rounded-t-sm"
+                      key={`rect-crash-${i}`}
+                      className="absolute bottom-0 bg-black"
                       style={{
                         left: `${left}%`,
                         width: `${width}px`,

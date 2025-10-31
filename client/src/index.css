@@ -197,12 +197,13 @@
   }
 }
 
-@keyframes buildingMove {
+@keyframes rectangleMove {
   0% {
-    transform: translateX(0) translateY(0) scale(1);
+    transform: translateX(0) scale(1);
+    opacity: 1;
   }
   100% {
-    transform: translateX(-30px) translateY(-20px) scale(0.8);
+    transform: translateX(-100px) scale(0.4);
     opacity: 0;
   }
 }
