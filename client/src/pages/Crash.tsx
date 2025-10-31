@@ -406,15 +406,15 @@ export const Crash = (): JSX.Element => {
       </div>
 
       <main className="flex flex-col px-4 sm:px-6 md:px-8 gap-3 sm:gap-4 pb-20 md:pb-8">
-        <section className="relative w-full h-[220px] sm:h-[261px] md:h-[300px] lg:h-[350px] rounded-3xl bg-[#1a1a2b] overflow-hidden">
-          {gameState.phase !== "waiting" && gameState.multiplier < 2.5 && (
+        <section className="relative w-full h-[220px] sm:h-[261px] md:h-[300px] lg:h-[350px] rounded-3xl bg-[linear-gradient(180deg,rgba(26,26,43,1)_0%,rgba(21,21,26,1)_100%)] overflow-hidden">
+          {gameState.phase === "flying" && gameState.multiplier < 2.5 && (
             <img
               className="absolute inset-0 w-full h-full object-cover"
               alt="Mask group"
               src="/figmaAssets/mask-group.png"
             />
           )}
-          {gameState.phase === "waiting" && (
+          {gameState.phase === "crashed" && gameState.crashPoint < 2.5 && (
             <img
               className="absolute inset-0 w-full h-full object-cover"
               alt="Mask group"
